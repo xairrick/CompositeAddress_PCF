@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <manifest>
-  <control namespace="AB" constructor="CompositeAddress" version="0.0.21" display-name-key="Composite Address Control" description-key="Use this control to minimize the size of address section on the form and format it the way you want" control-type="standard">
+  <control namespace="AB" constructor="CompositeAddress" version="0.0.22" display-name-key="Composite Address Control" description-key="Use this control to minimize the size of address section on the form and format it the way you want" control-type="standard">
     <property name="value" display-name-key="Full Address" description-key="Full Address" of-type="SingleLine.Text" usage="bound" required="true" />
     <property name="format" display-name-key="Address Formatting" description-key="Provide pattern to format Full Address" of-type="SingleLine.Text" usage="input" required="true" />
     <property name="street1" display-name-key="Street 1" description-key="Street 1" of-type="SingleLine.Text" usage="bound" required="true" />

@@ -79,24 +79,34 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
             html: true,
             placement: "bottom",
             //trigger: "focus"   //focus doesn't work  (can't edit the fields in the popover)
-            // trigger: "click focus"   //click focus doesn't work  (when you click off the focus changes but it needs both eg)
+            //trigger: "click focus"   //click focus doesn't work  (when you click off the focus changes but it needs both to close)
+        }).on('shown.bs.popover', this.addTimer).on('hidden.bs.popover', this.removeTimer);
 
-        });
 
-        this.timer = setInterval(() => {
-            var element = document.activeElement;
-            if (element) {
-                if (!element.className.includes(this.uniqueClassName)) {
-                    $(this.mainAddressField).popover("hide");
-                }
+    }
+
+    addTimer = () => {
+        $(`.${this.uniqueClassName}:first`).focus();
+        this.timer = setInterval(this.hideWhenFocusIsLost, 250);
+    }
+    hideWhenFocusIsLost = () => {
+        var element = document.activeElement;
+        if (element) {
+            if (!element.className.includes(this.uniqueClassName)) {
+                $(this.mainAddressField).popover("hide");
             }
-        },
-        1000);
+        }
+    }
+    removeTimer = () => {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
+        }
     }
 
     private addControltoPopup(addressProperty: ComponentFramework.PropertyTypes.Property,
-        container: HTMLDivElement,
-        controlId: string): void {
+            container: HTMLDivElement,
+            controlId: string): void {
 
         let rowDiv = document.createElement("div");
         rowDiv.className = "form-group";
@@ -232,8 +242,8 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
 
     public destroy(): void {
         // Add code to cleanup control if necessary
+        this.removeTimer();
         $(this.mainAddressField).popover("hide");
-        clearInterval(this.timer);
     }
     private static generateUUID(): string {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
