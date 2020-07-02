@@ -10,6 +10,8 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
     private currentValues: any = new Object();
     private currentLabels: any = new Object();
     private allControls: any = new Object();
+    private timer: any;
+    private uniqueClassName = CompositeAddress.generateUUID();
 
     constructor() {
 
@@ -75,13 +77,27 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
         $(this.mainAddressField).popover({
             content: popupDiv,
             html: true,
-            placement: "bottom"
+            placement: "bottom",
+            //trigger: "focus"   //focus doesn't work  (can't edit the fields in the popover)
+            // trigger: "click focus"   //click focus doesn't work  (when you click off the focus changes but it needs both eg)
+
         });
+
+        this.timer = setInterval(() => {
+            var element = document.activeElement;
+            if (element) {
+                if (!element.className.includes(this.uniqueClassName)) {
+                    $(this.mainAddressField).popover("hide");
+                }
+            }
+        },
+        1000);
     }
 
     private addControltoPopup(addressProperty: ComponentFramework.PropertyTypes.Property,
         container: HTMLDivElement,
         controlId: string): void {
+
         let rowDiv = document.createElement("div");
         rowDiv.className = "form-group";
         container.appendChild(rowDiv);
@@ -95,7 +111,7 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
 
             let inputControl = document.createElement("input");
             inputControl.id = controlId;
-            inputControl.className = "form-control d365StyleInput";
+            inputControl.className = `form-control d365StyleInput ${this.uniqueClassName}`;
             inputControl.setAttribute("placeholder", "---");
             inputControl.value = stringAddressProperty.raw;
             inputControl.addEventListener("change", () => {
@@ -125,7 +141,7 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
 
             let selectControl = document.createElement("select");
             selectControl.id = controlId;
-            selectControl.className = "form-control d365StyleInput";
+            selectControl.className = `form-control d365StyleInput ${this.uniqueClassName}`;
 
             let option: HTMLOptionElement = document.createElement("option");
             option.innerHTML = "---Select---";
@@ -175,7 +191,7 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
         formattedAddress = formattedAddress.replace(/\\n/gm, '\n');
 
         for (let propName in this.currentLabels) {
-            let propertyValue = this.currentLabels[propName] === null ? "" : this.currentLabels[propName];
+            let propertyValue: string = this.currentLabels[propName] === null ? "" : (this.currentLabels[propName] as string);
 
             formattedAddress = formattedAddress.replace(`{${propName}}`, propertyValue);
         }
@@ -189,7 +205,7 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
 
         context.updatedProperties.forEach(updatedProperty => {
             if (!context.parameters.hasOwnProperty(updatedProperty)) {
-                return ;
+                return;
             }
 
             formatChanged = true;
@@ -216,5 +232,13 @@ export class CompositeAddress implements ComponentFramework.StandardControl<IInp
 
     public destroy(): void {
         // Add code to cleanup control if necessary
+        $(this.mainAddressField).popover("hide");
+        clearInterval(this.timer);
+    }
+    private static generateUUID(): string {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
     }
 }
